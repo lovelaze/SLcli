@@ -137,34 +137,59 @@ public class SLParser {
 		System.out.println(url.toString()); // DEBUG
 		Document doc = parseXML(url);
 		XPath xPath = XPathFactory.newInstance().newXPath();
-		
 		// create list of trips
 		ArrayList<Trip> trips = new ArrayList<Trip>();
-				
-		// GET SUMMARY
-		Node summaryNode = (Node) xPath.evaluate("//Summary", doc.getDocumentElement(), XPathConstants.NODE);
-		String sumOrigin = summaryNode.getChildNodes().item(0).getTextContent();
-		String sumDest = summaryNode.getChildNodes().item(1).getTextContent();
-		String sumDepTime = summaryNode.getChildNodes().item(3).getTextContent();
-		String sumArTime = summaryNode.getChildNodes().item(5).getTextContent();
 		
-		Trip trip = new Trip(sumOrigin, sumDest, sumDepTime, sumArTime);
-
-		// GET SUBTRIPS
-		NodeList tempNodes = (NodeList) xPath.evaluate("//SubTrip",doc.getDocumentElement(), XPathConstants.NODESET);
-		for (int i = 0; i < tempNodes.getLength(); i++) {
-			NodeList childNodes = tempNodes.item(i).getChildNodes();
-			String origin = childNodes.item(0).getTextContent(); // origin
-			String destination = childNodes.item(1).getTextContent(); // destination
-			String departureTime = childNodes.item(3).getTextContent(); // start-time
-			String arrivalTime = childNodes.item(5).getTextContent(); // end-time
-			String transportType = childNodes.item(6).getChildNodes().item(0).getTextContent(); // type
-			String transportLine = childNodes.item(6).getChildNodes().item(2).getTextContent(); // line
-			String stopsURI = childNodes.item(7).getTextContent(); // intermediate stops uri
-
-			SubTrip sub = new SubTrip(origin, destination, departureTime, arrivalTime, transportType, transportLine, stopsURI);
+		// Create trips
+		NodeList tripNodes = (NodeList) xPath.evaluate("//Trip", doc.getDocumentElement(), XPathConstants.NODESET);
+		for (int i=0; i < tripNodes.getLength(); i++) {
+			NodeList tempList = tripNodes.item(i).getChildNodes();
+			// first get the summary
+			Node summaryNode = tempList.item(0);
+			String sumOrigin = summaryNode.getChildNodes().item(0).getTextContent();
+			String sumDest = summaryNode.getChildNodes().item(1).getTextContent();
+			String sumDepTime = summaryNode.getChildNodes().item(3).getTextContent();
+			String sumArTime = summaryNode.getChildNodes().item(5).getTextContent();
+				// maybe add duration ?
 			
-			trip.addSubTrip(sub);
+			Trip trip = new Trip(sumOrigin, sumDest, sumDepTime, sumArTime);
+			
+			// then gather all subtrips
+			
+			for (int j=1; j < tempList.getLength(); j++) { // maybe could use xpath to find subtrips from tripNodes instead
+				Node subTripNode = tempList.item(i);
+				String origin = subTripNode.getChildNodes().item(0).getTextContent(); // origin
+				String destination = subTripNode.getChildNodes().item(1).getTextContent(); // destination
+				String departureTime = subTripNode.getChildNodes().item(3).getTextContent(); // start-time
+				String arrivalTime = subTripNode.getChildNodes().item(5).getTextContent(); // end-time
+				String transportType = subTripNode.getChildNodes().item(6).getChildNodes().item(0).getTextContent(); // type
+				String transportLine = subTripNode.getChildNodes().item(6).getChildNodes().item(2).getTextContent(); // line
+				String stopsURI = subTripNode.getChildNodes().item(7).getTextContent(); // intermediate stops uri
+				
+				SubTrip sub = new SubTrip(origin, destination, departureTime, arrivalTime, transportType, transportLine, stopsURI);
+				trip.addSubTrip(sub);
+			}
+			
+			/*
+			NodeList subNodes = (NodeList) xPath.evaluate("//SubTrip", tempList, XPathConstants.NODESET);
+			for (int j=0; j< subNodes.getLength(); j++) {
+				Node subTripNode = subNodes.item(i);
+				String origin = subTripNode.getChildNodes().item(0).getTextContent(); // origin
+				String destination = subTripNode.getChildNodes().item(1).getTextContent(); // destination
+				String departureTime = subTripNode.getChildNodes().item(3).getTextContent(); // start-time
+				String arrivalTime = subTripNode.getChildNodes().item(5).getTextContent(); // end-time
+				String transportType = subTripNode.getChildNodes().item(6).getChildNodes().item(0).getTextContent(); // type
+				String transportLine = subTripNode.getChildNodes().item(6).getChildNodes().item(2).getTextContent(); // line
+				String stopsURI = subTripNode.getChildNodes().item(7).getTextContent(); // intermediate stops uri
+				
+				SubTrip sub = new SubTrip(origin, destination, departureTime, arrivalTime, transportType, transportLine, stopsURI);
+				trip.addSubTrip(sub);
+				
+			}*/
+			
+				
+			
+			trips.add(trip);
 		}
 
 		return trips;

@@ -93,7 +93,20 @@ public class Main {
 		 * "slussen"); for (String s : temp) { System.out.println(s); }
 		 */
 
-		main.printDepartures("slussen", 10);
+		//main.printDepartures("slussen", 10);
+		long start = System.currentTimeMillis();
+		ArrayList<Trip> trips = main.sl.getTravelTrips("finnboda%hamn", "slussen");
+		System.out.println("getTravelTrips time: "+(System.currentTimeMillis()-start));
+		
+		System.out.println("trips length = " + trips.size());
+		for (Trip t : trips) {
+			System.out.println(t.getOrigin() + " " + t.getDepartureTime() + " -> " + t.getDestination() + " " + t.getArrivalTime());
+			ArrayList<SubTrip> subs = t.getSubTrips();
+			for (SubTrip s : subs) {
+				System.out.println("\t"+s.getTransportType() + " " + s.getTransportLine() + " : " + s.getOrigin() + " -> " +s.getDestination());
+			}
+		}
+		
 
 	}
 
