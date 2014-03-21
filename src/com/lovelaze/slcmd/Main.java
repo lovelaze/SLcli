@@ -1,3 +1,4 @@
+package com.lovelaze.slcmd;
 /*
  * This is the main class for the command-line SL-parser
  */

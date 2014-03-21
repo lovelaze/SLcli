@@ -1,3 +1,4 @@
+package com.lovelaze.slcmd;
 
 public class SubTrip {
 	
