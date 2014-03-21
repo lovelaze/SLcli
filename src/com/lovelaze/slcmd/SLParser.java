@@ -157,7 +157,7 @@ public class SLParser {
 			// then gather all subtrips
 			
 			for (int j=1; j < tempList.getLength(); j++) { // maybe could use xpath to find subtrips from tripNodes instead
-				Node subTripNode = tempList.item(i);
+				Node subTripNode = tempList.item(j);
 				String origin = subTripNode.getChildNodes().item(0).getTextContent(); // origin
 				String destination = subTripNode.getChildNodes().item(1).getTextContent(); // destination
 				String departureTime = subTripNode.getChildNodes().item(3).getTextContent(); // start-time

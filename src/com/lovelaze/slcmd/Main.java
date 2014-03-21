@@ -30,6 +30,8 @@ public class Main {
 		options.addOption("h", false, "Display help.");
 		options.addOption("d", true, "Get departures from a given location.");
 		options.addOption("t", true, "Time Window");
+		options.addOption("s", true, "Start");
+		options.addOption("e", true, "End");
 	}
 
 	/*
@@ -57,6 +59,21 @@ public class Main {
 		
 	}
 	
+	public void printTrip(String origin, String destination) throws Exception {
+		
+		ArrayList<Trip> trips = sl.getTravelTrips(origin, destination);
+		
+		System.out.println("trips length = " + trips.size());
+		for (Trip t : trips) {
+			System.out.println(t.getOrigin() + " " + t.getDepartureTime() + " -> " + t.getDestination() + " " + t.getArrivalTime());
+			ArrayList<SubTrip> subs = t.getSubTrips();
+			for (SubTrip s : subs) {
+				System.out.println("\t"+s.getTransportType() + " " + s.getTransportLine() + " : " + s.getOrigin() + " " +s.getDepartureTime()+ " -> " +s.getDestination() +" "+s.getArrivalTime());
+			}
+		}
+		
+	}
+	
 
 	public static void main(String[] args) throws Exception {
 
@@ -76,7 +93,7 @@ public class Main {
 
 		if (cmd.hasOption("d")) {
 			if (cmd.hasOption("t")) {
-				String station = cmd.getOptionValue("d").trim();
+				String station = cmd.getOptionValue("t").trim();
 				int timeWindow = Integer.parseInt(cmd.getOptionValue("t")
 						.trim());
 				main.printDepartures(station, timeWindow);
@@ -85,29 +102,17 @@ public class Main {
 				String station = cmd.getOptionValue("d").trim();
 				main.printDepartures(station, 10);
 			}
-
-		}
-
-		/*
-		 * ArrayList<String> temp = main.sl.getTravelTrips("finnboda%hamn",
-		 * "slussen"); for (String s : temp) { System.out.println(s); }
-		 */
-
-		//main.printDepartures("slussen", 10);
-		long start = System.currentTimeMillis();
-		ArrayList<Trip> trips = main.sl.getTravelTrips("finnboda%hamn", "slussen");
-		System.out.println("getTravelTrips time: "+(System.currentTimeMillis()-start));
-		
-		System.out.println("trips length = " + trips.size());
-		for (Trip t : trips) {
-			System.out.println(t.getOrigin() + " " + t.getDepartureTime() + " -> " + t.getDestination() + " " + t.getArrivalTime());
-			ArrayList<SubTrip> subs = t.getSubTrips();
-			for (SubTrip s : subs) {
-				System.out.println("\t"+s.getTransportType() + " " + s.getTransportLine() + " : " + s.getOrigin() + " -> " +s.getDestination());
-			}
 		}
 		
+		if(cmd.hasOption("s") && cmd.hasOption("e")) {
+			String start = cmd.getOptionValue("s");
+			String end = cmd.getOptionValue("e");
+			main.printTrip(start, end);
+		}
 
+		
 	}
+	
+	
 
 }
