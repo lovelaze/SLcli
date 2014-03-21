@@ -2,26 +2,12 @@
  * This is the main class for the command-line SL-parser
  */
 
-
-import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 public class Main {
 
@@ -42,44 +28,71 @@ public class Main {
 
 		options.addOption("h", false, "Display help.");
 		options.addOption("d", true, "Get departures from a given location.");
+		options.addOption("t", true, "Time Window");
 	}
-	
+
 	/*
 	 * Return an arraylist of the option descriptions
 	 */
 	public void getOptionsDescriptions() {
+
+	}
+
+	private void printDepartures(String station, int timeWindow)
+			throws Exception {
+
+		ArrayList<ArrayList<Departure>> departures = sl.getDepartures(station, 10);
+		
+		for (int i=0; i<departures.size(); i++) {
+			if (departures.get(i).size() > 0) {
+				System.out.println("-----"+departures.get(i).get(0).getTransport().toUpperCase()+"-----");
+			}
+			
+			for (Departure d : departures.get(i)) {
+				String temp = "\t"+d.getTime() + " - " +d.getLine() + " " + d.getDestination();
+				System.out.println(temp);
+			}
+		}
 		
 	}
-	
 
 	public static void main(String[] args) throws Exception {
 
 		Main main = new Main();
 
-		String[] testArgs = { "-h", "-d test" };
+		String[] testArgs = { "-d slussen 10" };
 
 		CommandLineParser parser = new GnuParser();
-		CommandLine cmd = parser.parse(main.options, testArgs);
+		CommandLine cmd = parser.parse(main.options, args);
 
-		
 		// commandline arguments
-		/*if (cmd.hasOption("h")) {
-			System.out.println("-h");
-			
-		}
+		/*
+		 * if (cmd.hasOption("h")) { System.out.println("-h");
+		 * 
+		 * }
+		 */
 
 		if (cmd.hasOption("d")) {
-			System.out.println("-d");
+			if (cmd.hasOption("t")) {
+				String station = cmd.getOptionValue("d").trim();
+				int timeWindow = Integer.parseInt(cmd.getOptionValue("t")
+						.trim());
+				main.printDepartures(station, timeWindow);
 
-		}*/
-		
-		//
-		
-		ArrayList<String> departures = main.sl.getDepartures("slussen", 60);
-		
-		for (String i: departures) {
-			System.out.println(i);
+			} else {
+				String station = cmd.getOptionValue("d").trim();
+				main.printDepartures(station, 10);
+			}
+
 		}
 
+		/*
+		 * ArrayList<String> temp = main.sl.getTravelTrips("finnboda%hamn",
+		 * "slussen"); for (String s : temp) { System.out.println(s); }
+		 */
+
+		main.printDepartures("slussen", 10);
+
 	}
+
 }
