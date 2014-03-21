@@ -49,12 +49,13 @@ public class Main {
 			}
 			
 			for (Departure d : departures.get(i)) {
-				String temp = "\t"+d.getTime() + " - " +d.getLine() + " " + d.getDestination();
+				String temp = "\t"+d.getTime() + "\t- " +d.getLine() + " " + d.getDestination();
 				System.out.println(temp);
 			}
 		}
 		
 	}
+	
 
 	public static void main(String[] args) throws Exception {
 

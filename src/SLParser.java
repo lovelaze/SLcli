@@ -13,6 +13,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -28,6 +29,9 @@ public class SLParser {
 
 	}
 
+	/*
+	 * Return a list of departures from a station
+	 */
 	public ArrayList<ArrayList<Departure>> getDepartures(String station,
 			int timeWindow) throws Exception {
 		ArrayList<ArrayList<Departure>> departures = new ArrayList<ArrayList<Departure>>();
@@ -95,61 +99,6 @@ public class SLParser {
 	}
 
 	/*
-	 * public ArrayList<String> getDepartures(String station, int timeWindow)
-	 * throws IOException, ParserConfigurationException, SAXException,
-	 * XPathExpressionException {
-	 * 
-	 * ArrayList<String> departures = new ArrayList<String>();
-	 * 
-	 * int siteID; try { siteID = getSiteID(station); } catch (Exception e) {
-	 * departures.add(e.getMessage()); return departures; }
-	 * 
-	 * URL url = getAllDeparturesURL(siteID, timeWindow); Document doc =
-	 * parseXML(url);
-	 * 
-	 * XPath xPath = XPathFactory.newInstance().newXPath();
-	 * 
-	 * // GATHER BUS DEPARTURES NodeList tempNodes = (NodeList)
-	 * xPath.evaluate("//Bus", doc.getDocumentElement(),
-	 * XPathConstants.NODESET); for (int i=0; i < tempNodes.getLength(); i++) {
-	 * NodeList childNodes = tempNodes.item(i).getChildNodes(); String
-	 * destination = childNodes.item(0).getTextContent(); String time =
-	 * childNodes.item(2).getTextContent(); String line =
-	 * childNodes.item(4).getTextContent(); departures.add(time + "\t- " + line
-	 * + " " + destination); }
-	 * 
-	 * // GATHER METRO DEPARTURES tempNodes = (NodeList)
-	 * xPath.evaluate("//Metro//DepartureInfo", doc.getDocumentElement(),
-	 * XPathConstants.NODESET); for (int i=0; i < tempNodes.getLength(); i++) {
-	 * NodeList childNodes = tempNodes.item(i).getChildNodes(); String
-	 * destination = childNodes.item(0).getTextContent(); String time =
-	 * childNodes.item(1).getTextContent(); String line =
-	 * childNodes.item(2).getTextContent(); departures.add(time + "\t- " + line
-	 * + " " + destination); }
-	 * 
-	 * // GATHER TRAINS DEPARTURES tempNodes = (NodeList)
-	 * xPath.evaluate("//Train", doc.getDocumentElement(),
-	 * XPathConstants.NODESET); for (int i=0; i < tempNodes.getLength(); i++) {
-	 * NodeList childNodes = tempNodes.item(i).getChildNodes(); String
-	 * destination = childNodes.item(0).getTextContent(); String time =
-	 * childNodes.item(2).getTextContent(); String line =
-	 * childNodes.item(4).getTextContent(); departures.add(time + "\t- " + line
-	 * + " " + destination); }
-	 * 
-	 * // GATHER TRAMS DEPARTURES tempNodes = (NodeList)
-	 * xPath.evaluate("//Tram", doc.getDocumentElement(),
-	 * XPathConstants.NODESET); for (int i=0; i < tempNodes.getLength(); i++) {
-	 * NodeList childNodes = tempNodes.item(i).getChildNodes(); String
-	 * destination = childNodes.item(0).getTextContent(); String time =
-	 * childNodes.item(2).getTextContent(); String line =
-	 * childNodes.item(4).getTextContent(); departures.add(time + "\t- " + line
-	 * + " " + destination); }
-	 * 
-	 * 
-	 * return departures; }
-	 */
-
-	/*
 	 * Return the ID of a given site, returns null if no station was found
 	 */
 	public int getSiteID(String station) throws Exception {
@@ -174,9 +123,12 @@ public class SLParser {
 		return Integer.parseInt(nodes.item(0).getTextContent());
 	}
 
-	public ArrayList<String> getTravelTrips(String start, String end)
+	/*
+	 * TODO make a list of trips
+	 * Return a list of trips from destination A to B
+	 */
+	public ArrayList<Trip> getTravelTrips(String start, String end)
 			throws Exception {
-		ArrayList<String> trips = new ArrayList<String>();
 		int SID = getSiteID(start);
 		int ZID = getSiteID(end);
 
@@ -184,18 +136,34 @@ public class SLParser {
 		System.out.println(url.toString()); // DEBUG
 		Document doc = parseXML(url);
 		XPath xPath = XPathFactory.newInstance().newXPath();
+		
+		// create list of trips
+		ArrayList<Trip> trips = new ArrayList<Trip>();
+				
+		// GET SUMMARY
+		Node summaryNode = (Node) xPath.evaluate("//Summary", doc.getDocumentElement(), XPathConstants.NODE);
+		String sumOrigin = summaryNode.getChildNodes().item(0).getTextContent();
+		String sumDest = summaryNode.getChildNodes().item(1).getTextContent();
+		String sumDepTime = summaryNode.getChildNodes().item(3).getTextContent();
+		String sumArTime = summaryNode.getChildNodes().item(5).getTextContent();
+		
+		Trip trip = new Trip(sumOrigin, sumDest, sumDepTime, sumArTime);
 
-		NodeList tempNodes = (NodeList) xPath.evaluate("//SubTrip",
-				doc.getDocumentElement(), XPathConstants.NODESET);
+		// GET SUBTRIPS
+		NodeList tempNodes = (NodeList) xPath.evaluate("//SubTrip",doc.getDocumentElement(), XPathConstants.NODESET);
 		for (int i = 0; i < tempNodes.getLength(); i++) {
 			NodeList childNodes = tempNodes.item(i).getChildNodes();
 			String origin = childNodes.item(0).getTextContent(); // origin
 			String destination = childNodes.item(1).getTextContent(); // destination
-			String startTime = childNodes.item(3).getTextContent(); // start
-																	// time
-			String endTime = childNodes.item(5).getTextContent(); // end time
-			trips.add(origin + " : " + startTime + " -> " + destination + " : "
-					+ endTime);
+			String departureTime = childNodes.item(3).getTextContent(); // start-time
+			String arrivalTime = childNodes.item(5).getTextContent(); // end-time
+			String transportType = childNodes.item(6).getChildNodes().item(0).getTextContent(); // type
+			String transportLine = childNodes.item(6).getChildNodes().item(2).getTextContent(); // line
+			String stopsURI = childNodes.item(7).getTextContent(); // intermediate stops uri
+
+			SubTrip sub = new SubTrip(origin, destination, departureTime, arrivalTime, transportType, transportLine, stopsURI);
+			
+			trip.addSubTrip(sub);
 		}
 
 		return trips;
