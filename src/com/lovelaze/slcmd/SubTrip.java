@@ -8,10 +8,11 @@ public class SubTrip {
 	private String arrivalTime;
 	private String transportType;
 	private String transportLine;
+	private String transportTowards;
 	private String intermediateStopsURI;
 	
 	public SubTrip(String origin, String destination, String departureTime, String arrivalTime,
-			String transportType, String transportLine, String stopsURI) {
+			String transportType, String transportLine, String transportTowards,String stopsURI) {
 		
 		this.origin = origin;
 		this.destination = destination;
@@ -19,6 +20,7 @@ public class SubTrip {
 		this.arrivalTime = arrivalTime;
 		this.transportType = transportType;
 		this.transportLine = transportLine;
+		this.transportTowards = transportTowards;
 		this.intermediateStopsURI = stopsURI;
 		
 	}
@@ -49,6 +51,10 @@ public class SubTrip {
 	
 	public String getTransportType() {
 		return transportType;
+	}
+	
+	public String getTransportTowards() {
+		return transportTowards;
 	}
 	
 

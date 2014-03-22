@@ -8,13 +8,15 @@ public class Trip {
 	private String destination;
 	private String departureTime;
 	private String arrivalTime;
+	private String duration;
 	private ArrayList<SubTrip> subTrips;
 	
-	public Trip(String origin, String destination, String departureTime, String arrivalTime) {
+	public Trip(String origin, String destination, String departureTime, String arrivalTime, String duration) {
 		this.origin = origin;
 		this.destination = destination;
 		this.departureTime = departureTime;
 		this.arrivalTime = arrivalTime;
+		this.duration = duration;
 		subTrips = new ArrayList<SubTrip>();
 	}
 	
@@ -42,5 +44,8 @@ public class Trip {
 		return departureTime;
 	}
 	
+	public String getDuration() {
+		return duration;
+	}
 	
 }
