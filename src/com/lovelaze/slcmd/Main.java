@@ -4,7 +4,6 @@ package com.lovelaze.slcmd;
  */
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Scanner;
@@ -36,31 +35,44 @@ public class Main {
 	private void createOptions() {
 		
 
-		Option d = OptionBuilder.withArgName("station")
+		Option d = OptionBuilder.withArgName("-d")
 				.hasArg()
-				.withDescription("List departures froma a given station")
+				.withDescription("List departures from a given station")
 				.create("d");
-		Option w = OptionBuilder.withArgName("timeWindow")
+		
+		Option w = OptionBuilder.withArgName("-w")
 				.hasArg()
 				.withDescription("Time window for a departure")
 				.create("w");
 		
 		Option t = OptionBuilder.hasArgs(2)
+				.withArgName("-t")
 				.withDescription("List of trips from A to B")
 				.create("t");
 		
-		
+		Option h = OptionBuilder.withDescription("Print help")
+				.withArgName("-h")
+				.create("h");
 		
 		options.addOption(d);
 		options.addOption(w);
 		options.addOption(t);
+		options.addOption(h);
 		
 	}
 
 	/*
-	 * Return an arraylist of the option descriptions
+	 * Print help 
 	 */
-	public void getOptionsDescriptions() {
+	public void printHelp() {
+		@SuppressWarnings("unchecked")
+		Iterator<Option> it = (Iterator<Option>) options.getOptions().iterator();
+		
+		while (it.hasNext()) {
+			Option op = (Option) it.next();
+			System.out.println( op.getArgName() + "\t" + op.getDescription());
+		}
+		
 
 	}
 	
@@ -166,6 +178,8 @@ public class Main {
 			String start = cmd.getOptionValues("t")[0].trim();
 			String end = cmd.getOptionValues("t")[1].trim();
 			main.printTrip(start, end);
+		} else if (cmd.hasOption("-h")) {
+			main.printHelp();
 		}
 		
 		
