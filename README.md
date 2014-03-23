@@ -2,5 +2,17 @@ SLcmd
 =====
 
 A commandline interface for SL.
-usage: java -jar sl.jar
-arguments: -d, -w, -t, -h
+
+Usage: java -jar sl.jar
+
+Arguments: -d, -w, -t, -h
+
+Examples:
+
+-d brommaplan
+
+-d brommaplan -w 30
+
+-t slussen "tekniska högskolan"
+
+-h
