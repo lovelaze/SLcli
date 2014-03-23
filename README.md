@@ -1,7 +1,7 @@
 SLcmd
 =====
 
-A commandline interface for SL.
+A commandline interface for SL in Stockholm.
 
 Usage: java -jar sl.jar
 
