@@ -23,7 +23,7 @@ public class Main {
 
 	public Main() {
 		options = new Options();
-		createOptions();
+		createOptions(options);
 		sl = new SLParser();
 
 	}
@@ -32,7 +32,7 @@ public class Main {
 	 * Create the cmd-line options.
 	 */
 	@SuppressWarnings("static-access")
-	private void createOptions() {
+	private void createOptions(Options options) {
 		
 
 		Option d = OptionBuilder.withArgName("-d")
@@ -77,7 +77,9 @@ public class Main {
 	}
 	
 	
-
+	/*
+	 * print print departures from a station given a time window
+	 */
 	public void printDepartures(String station, int timeWindow)
 			throws Exception {
 		
@@ -98,7 +100,10 @@ public class Main {
 		
 	}
 	
-	public void printTrip(String origin, String destination) throws Exception {
+	/*
+	 * Print trips from A to B
+	 */
+	public void printTrips(String origin, String destination) throws Exception {
 		
 		int SID = chooseStation(origin);
 		int ZID = chooseStation(destination);
@@ -122,7 +127,7 @@ public class Main {
 		int siteID = 0;
 		
 		// given a list of station choices, choose one
-		Map<String, Integer> stations = new TreeMap<String, Integer>(sl.getStations(station));
+		Map<String, Integer> stations = new TreeMap<String, Integer>(sl.getStations(station)); // use treemap to sort the keys
 		
 		if (stations.size() == 1) {
 			siteID = (int) stations.values().toArray()[0];
@@ -152,17 +157,8 @@ public class Main {
 
 		Main main = new Main();
 
-
 		CommandLineParser parser = new GnuParser();
 		CommandLine cmd = parser.parse(main.options, args);
-
-		// commandline arguments
-		
-		/*
-		  if (cmd.hasOption("h")) { 
-			  System.out.println("-h");
-		  }*/
-		 
 
 		if (cmd.hasOption("d")) {
 			if (cmd.hasOption("w")) {
@@ -177,21 +173,11 @@ public class Main {
 		} else if(cmd.hasOption("t")) {
 			String start = cmd.getOptionValues("t")[0].trim();
 			String end = cmd.getOptionValues("t")[1].trim();
-			main.printTrip(start, end);
+			main.printTrips(start, end);
 		} else if (cmd.hasOption("-h")) {
 			main.printHelp();
 		}
 		
-		
-		
-		//main.printDepartures("bromma", 30);
-		//main.printTrip("närlundastugan", "östermalm");
-		
-		
 	}
 	
-	
-	
-	
-
 }

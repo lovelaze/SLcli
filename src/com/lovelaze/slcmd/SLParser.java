@@ -31,6 +31,9 @@ public class SLParser {
 
 	}
 
+	/*
+	 * Return a hashmap with station names as keys and their IDs as values
+	 */
 	public HashMap<String, Integer> getStations(String station) throws Exception {
 		HashMap<String, Integer> stations = new HashMap<String, Integer>();
 		
@@ -53,7 +56,8 @@ public class SLParser {
 	}
 
 	/*
-	 * Return the ID of a given site, returns null if no station was found
+	 * Return the ID of a given site
+	 * RATHER USE getStations
 	 */
 	public int getSiteID(String station) throws Exception {
 		URL url = new URL("https://api.trafiklab.se/sl/realtid/GetSite?stationSearch="+ station + "&key=" + realtid1Key);
@@ -76,7 +80,7 @@ public class SLParser {
 	
 	
 	/*
-	 * Return a list of departures give a site ID
+	 * Return a list of departures given a site ID
 	 */
 	public ArrayList<ArrayList<Departure>> getDepartures(int siteID,
 			int timeWindow) throws Exception {
@@ -147,26 +151,12 @@ public class SLParser {
 	 */
 	public ArrayList<Trip> getTravelTrips(int SID, int ZID)
 			throws Exception {
-		
-		
-		/*int SID = getSiteID(start);
-		int ZID = getSiteID(end);*/
 
 		URL url = getPlannerURL(SID, ZID);
 		Document doc = parseXML(url);
-		
-		/* //SAVE XML DOCUMENT TO FILE FOR DEBUGGING PURPOSES
-		Transformer transformer = TransformerFactory.newInstance().newTransformer();
-		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-		transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-		Result output = new StreamResult(new File("output.xml"));
-		Source input = new DOMSource(doc);
-		transformer.transform(input, output);
-		// END OF SAVING */
-		
 		XPath xPath = XPathFactory.newInstance().newXPath();
-		// create list of trips
-		ArrayList<Trip> trips = new ArrayList<Trip>();
+		
+		ArrayList<Trip> trips = new ArrayList<Trip>(); // create list of trips
 		
 		// Create trips
 		NodeList tripNodes = (NodeList) xPath.evaluate("//Trip", doc.getDocumentElement(), XPathConstants.NODESET);
@@ -198,25 +188,6 @@ public class SLParser {
 				trip.addSubTrip(sub);
 			}
 			
-			/* NON-FUNCTIONAL
-			NodeList subNodes = (NodeList) xPath.evaluate("//SubTrip", tempList, XPathConstants.NODESET);
-			for (int j=0; j< subNodes.getLength(); j++) {
-				Node subTripNode = subNodes.item(i);
-				String origin = subTripNode.getChildNodes().item(0).getTextContent(); // origin
-				String destination = subTripNode.getChildNodes().item(1).getTextContent(); // destination
-				String departureTime = subTripNode.getChildNodes().item(3).getTextContent(); // start-time
-				String arrivalTime = subTripNode.getChildNodes().item(5).getTextContent(); // end-time
-				String transportType = subTripNode.getChildNodes().item(6).getChildNodes().item(0).getTextContent(); // type
-				String transportLine = subTripNode.getChildNodes().item(6).getChildNodes().item(2).getTextContent(); // line
-				String stopsURI = subTripNode.getChildNodes().item(7).getTextContent(); // intermediate stops uri
-				
-				SubTrip sub = new SubTrip(origin, destination, departureTime, arrivalTime, transportType, transportLine, stopsURI);
-				trip.addSubTrip(sub);
-				
-			}*/
-			
-				
-			
 			trips.add(trip);
 		}
 
@@ -224,7 +195,7 @@ public class SLParser {
 	}
 
 	/*
-	 * Return an XML-URL given a site ID and time window
+	 * Return an URL given a site ID and time window
 	 */
 	private URL getAllDeparturesURL(int siteID, int timeWindow)
 			throws IOException {
@@ -233,6 +204,9 @@ public class SLParser {
 		return new URL(uri);
 	}
 
+	/*
+	 * Return an URL given a site ID and time window
+	 */
 	private URL getPlannerURL(int startID, int endID)
 			throws MalformedURLException {
 		String uri = "https://api.trafiklab.se/sl/reseplanerare.xml?S="
@@ -242,7 +216,7 @@ public class SLParser {
 	}
 
 	/*
-	 * Parses a given URL into a Document
+	 * Return a document parsed with the given URL
 	 */
 	private Document parseXML(URL url) throws IOException,
 			ParserConfigurationException, SAXException {
