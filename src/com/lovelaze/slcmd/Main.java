@@ -137,7 +137,6 @@ public class Main {
 			int i = 0;
 			for (Map.Entry<String, Integer> entry : stations.entrySet()) {
 				String name = entry.getKey();
-				int id = entry.getValue();
 				System.out.println("[" + i + "] " + name);
 				i++;
 			}
