@@ -1,4 +1,4 @@
-SLcmd
+SLcli
 =====
 
 A commandline interface for SL in Stockholm.
