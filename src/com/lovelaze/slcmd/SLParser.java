@@ -1,4 +1,5 @@
 package com.lovelaze.slcmd;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -36,23 +37,22 @@ public class SLParser {
 	 */
 	public HashMap<String, Integer> getStations(String station) throws Exception {
 		HashMap<String, Integer> stations = new HashMap<String, Integer>();
-		
+
 		URL url = new URL("https://api.trafiklab.se/sl/realtid/GetSite?stationSearch="+ station + "&key=" + realtid1Key);
 		Document doc = parseXML(url);
-		
 
 		XPath xPath = XPathFactory.newInstance().newXPath();
-		NodeList siteNodes = (NodeList) xPath.evaluate("//Site",doc.getDocumentElement(), XPathConstants.NODESET);
-		
-		for (int i=0; i < siteNodes.getLength(); i++) {;
+		NodeList siteNodes = (NodeList) xPath.evaluate("//Site", doc.getDocumentElement(), XPathConstants.NODESET);
+
+		for (int i = 0; i < siteNodes.getLength(); i++) {
 			String name = siteNodes.item(i).getChildNodes().item(3).getTextContent();
 			int id = Integer.parseInt(siteNodes.item(i).getChildNodes().item(1).getTextContent());
 
 			stations.put(name, id);
 		}
-		
+
 		return stations;
-		
+
 	}
 
 	/*
@@ -64,7 +64,7 @@ public class SLParser {
 		Document doc = parseXML(url);
 
 		XPath xPath = XPathFactory.newInstance().newXPath();
-		NodeList nodes = (NodeList) xPath.evaluate("//Site/Number", doc.getDocumentElement(), XPathConstants.NODESET);
+		NodeList nodes = (NodeList) xPath.evaluate("//Site/Number",doc.getDocumentElement(), XPathConstants.NODESET);
 
 		int len = nodes.getLength();
 		if (len < 1) {
@@ -77,38 +77,35 @@ public class SLParser {
 		System.out.println(nodes.item(0).getTextContent());
 		return Integer.parseInt(nodes.item(0).getTextContent());
 	}
-	
-	
+
 	/*
 	 * Return a list of departures given a site ID
 	 */
-	public ArrayList<ArrayList<Departure>> getDepartures(int siteID,
-			int timeWindow) throws Exception {
+	public ArrayList<ArrayList<Departure>> getDepartures(int siteID, int timeWindow) throws Exception {
+		
 		ArrayList<ArrayList<Departure>> departures = new ArrayList<ArrayList<Departure>>();
-		for (int i=0; i<4; i++) {
+		for (int i = 0; i < 4; i++) {
 			departures.add(new ArrayList<Departure>());
 		}
-		
 
 		URL url = getAllDeparturesURL(siteID, timeWindow);
 		Document doc = parseXML(url);
 		XPath xPath = XPathFactory.newInstance().newXPath();
 
 		// GATHER BUS DEPARTURES
-		NodeList tempNodes = (NodeList) xPath.evaluate("//Bus",doc.getDocumentElement(), XPathConstants.NODESET);
-		for (int i = 0; i < tempNodes.getLength(); i++) {	// add each bus departure to the first arraylist
+		NodeList tempNodes = (NodeList) xPath.evaluate("//Bus", doc.getDocumentElement(), XPathConstants.NODESET);
+		for (int i = 0; i < tempNodes.getLength(); i++) { // add each bus departure to the first arraylist
 			NodeList childNodes = tempNodes.item(i).getChildNodes();
 			String destination = childNodes.item(0).getTextContent();
 			String time = childNodes.item(2).getTextContent();
 			String line = childNodes.item(4).getTextContent();
-			
+
 			Departure d = new Departure(destination, time, line, "bus");
 			departures.get(0).add(d);
 		}
 
 		// GATHER METRO DEPARTURES
-		tempNodes = (NodeList) xPath.evaluate("//Metro//DepartureInfo",
-				doc.getDocumentElement(), XPathConstants.NODESET);
+		tempNodes = (NodeList) xPath.evaluate("//Metro//DepartureInfo", doc.getDocumentElement(), XPathConstants.NODESET);
 		for (int i = 0; i < tempNodes.getLength(); i++) {
 			NodeList childNodes = tempNodes.item(i).getChildNodes();
 			String destination = childNodes.item(0).getTextContent();
@@ -119,8 +116,7 @@ public class SLParser {
 		}
 
 		// GATHER TRAINS DEPARTURES
-		tempNodes = (NodeList) xPath.evaluate("//Train",
-				doc.getDocumentElement(), XPathConstants.NODESET);
+		tempNodes = (NodeList) xPath.evaluate("//Train", doc.getDocumentElement(), XPathConstants.NODESET);
 		for (int i = 0; i < tempNodes.getLength(); i++) {
 			NodeList childNodes = tempNodes.item(i).getChildNodes();
 			String destination = childNodes.item(0).getTextContent();
@@ -131,8 +127,7 @@ public class SLParser {
 		}
 
 		// GATHER TRAMS DEPARTURES
-		tempNodes = (NodeList) xPath.evaluate("//Tram",
-				doc.getDocumentElement(), XPathConstants.NODESET);
+		tempNodes = (NodeList) xPath.evaluate("//Tram", doc.getDocumentElement(), XPathConstants.NODESET);
 		for (int i = 0; i < tempNodes.getLength(); i++) {
 			NodeList childNodes = tempNodes.item(i).getChildNodes();
 			String destination = childNodes.item(0).getTextContent();
@@ -149,31 +144,30 @@ public class SLParser {
 	/*
 	 * Return a list of trips from destination A to B
 	 */
-	public ArrayList<Trip> getTravelTrips(int SID, int ZID)
-			throws Exception {
+	public ArrayList<Trip> getTravelTrips(int SID, int ZID) throws Exception {
 
 		URL url = getPlannerURL(SID, ZID);
 		Document doc = parseXML(url);
 		XPath xPath = XPathFactory.newInstance().newXPath();
-		
+
 		ArrayList<Trip> trips = new ArrayList<Trip>(); // create list of trips
-		
+
 		// Create trips
 		NodeList tripNodes = (NodeList) xPath.evaluate("//Trip", doc.getDocumentElement(), XPathConstants.NODESET);
-		for (int i=0; i < tripNodes.getLength(); i++) {
+		for (int i = 0; i < tripNodes.getLength(); i++) {
 			NodeList tempList = tripNodes.item(i).getChildNodes();
 			// first get the summary
 			Node summaryNode = tempList.item(0);
-			String summaryOrigin = summaryNode.getChildNodes().item(0).getTextContent();
-			String summaryDestination = summaryNode.getChildNodes().item(1).getTextContent();
-			String summaryDepartureTime = summaryNode.getChildNodes().item(3).getTextContent();
-			String summaryArrivalTime = summaryNode.getChildNodes().item(5).getTextContent();
-			String summaryDuration = summaryNode.getChildNodes().item(8).getTextContent();
-			
-			Trip trip = new Trip(summaryOrigin, summaryDestination, summaryDepartureTime, summaryArrivalTime, summaryDuration);
-			
+			String summaryOrigin = summaryNode.getChildNodes().item(0).getTextContent(); // origin
+			String summaryDestination = summaryNode.getChildNodes().item(1).getTextContent(); // destination
+			String summaryDepartureTime = summaryNode.getChildNodes().item(3).getTextContent(); // departure time
+			String summaryArrivalTime = summaryNode.getChildNodes().item(5).getTextContent(); // arrival time
+			String summaryDuration = summaryNode.getChildNodes().item(8).getTextContent(); // duration
+
+			Trip trip = new Trip(summaryOrigin, summaryDestination,summaryDepartureTime, summaryArrivalTime, summaryDuration);
+
 			// then gather all subtrips
-			for (int j=1; j < tempList.getLength(); j++) { // maybe could use xpath to find subtrips from tripNodes instead
+			for (int j = 1; j < tempList.getLength(); j++) {
 				Node subTripNode = tempList.item(j);
 				String origin = subTripNode.getChildNodes().item(0).getTextContent(); // origin
 				String destination = subTripNode.getChildNodes().item(1).getTextContent(); // destination
@@ -183,11 +177,11 @@ public class SLParser {
 				String transportLine = subTripNode.getChildNodes().item(6).getChildNodes().item(2).getTextContent(); // line
 				String transportTowards = subTripNode.getChildNodes().item(6).getChildNodes().item(3).getTextContent(); // towards
 				String stopsURI = subTripNode.getChildNodes().item(7).getTextContent(); // intermediate stops uri
-				
+
 				SubTrip sub = new SubTrip(origin, destination, departureTime, arrivalTime, transportType, transportLine, transportTowards, stopsURI);
 				trip.addSubTrip(sub);
 			}
-			
+
 			trips.add(trip);
 		}
 
@@ -197,29 +191,23 @@ public class SLParser {
 	/*
 	 * Return an URL given a site ID and time window
 	 */
-	private URL getAllDeparturesURL(int siteID, int timeWindow)
-			throws IOException {
-		String uri = "https://api.trafiklab.se/sl/realtid2/GetAllDepartureTypes.xml/"
-				+ siteID + "/" + timeWindow + "?key=" + realtid2Key;
+	private URL getAllDeparturesURL(int siteID, int timeWindow) throws IOException {
+		String uri = "https://api.trafiklab.se/sl/realtid2/GetAllDepartureTypes.xml/"+ siteID + "/" + timeWindow + "?key=" + realtid2Key;
 		return new URL(uri);
 	}
 
 	/*
 	 * Return an URL given a site ID and time window
 	 */
-	private URL getPlannerURL(int startID, int endID)
-			throws MalformedURLException {
-		String uri = "https://api.trafiklab.se/sl/reseplanerare.xml?S="
-				+ startID + "&Z=" + endID + "&Timesel=depart&Lang=sv&key="
-				+ reseplanKey;
+	private URL getPlannerURL(int startID, int endID) throws MalformedURLException {
+		String uri = "https://api.trafiklab.se/sl/reseplanerare.xml?S=" + startID + "&Z=" + endID + "&Timesel=depart&Lang=sv&key="+ reseplanKey;
 		return new URL(uri);
 	}
 
 	/*
 	 * Return a document parsed with the given URL
 	 */
-	private Document parseXML(URL url) throws IOException,
-			ParserConfigurationException, SAXException {
+	private Document parseXML(URL url) throws IOException, ParserConfigurationException, SAXException {
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.setRequestMethod("GET");
 		connection.setRequestProperty("Accept", "application/xml");
