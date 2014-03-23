@@ -13,6 +13,6 @@ Examples:
 
 -d brommaplan -w 30
 
--t slussen "tekniska högskolan"
+-t slussen "tekniskahögskolan"
 
 -h
